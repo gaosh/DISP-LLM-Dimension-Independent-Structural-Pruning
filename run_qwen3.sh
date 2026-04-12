@@ -44,7 +44,6 @@ run_exp () {
         --min_hn_lr 1e-3 \
         --use_sch False \
         --num_workers 2 \
-        --gated_attn_flag False \
         --out_dir "$OUTDIR" \
         --exp_name "PruneQwen3_p${P}" \
         > "$LOGFILE" 2>&1
@@ -65,9 +64,9 @@ case "$TARGET" in
 
             run_exp \
             Qwen/Qwen3-8B \
-            mix \
-            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_8b_mix \
-            qwen3_8b_mix.txt \
+            alpaca \
+            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_8b_alpaca \
+            qwen3_8b_alpaca.txt \
             "$P"
         done
         ;;
@@ -83,9 +82,9 @@ case "$TARGET" in
 
             run_exp \
             Qwen/Qwen3-14B \
-            mix \
-            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_14b_mix \
-            qwen3_14b_mix.txt \
+            alpaca \
+            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_14b_alpaca \
+            qwen3_14b_alpaca.txt \
             "$P"
         done
         ;;
@@ -101,9 +100,9 @@ case "$TARGET" in
 
             run_exp \
             Qwen/Qwen3-32B \
-            mix \
-            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_32b_mix \
-            qwen3_32b_mix.txt \
+            alpaca \
+            /orange/sgao1/sgao1/saved_hns/disp_llm/qwen3_32b_alpaca \
+            qwen3_32b_alpaca.txt \
             "$P"
         done
         ;;

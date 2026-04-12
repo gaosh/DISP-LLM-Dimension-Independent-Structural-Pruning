@@ -10,10 +10,15 @@ from torch.utils.data import DataLoader
 
 
 # Automatically downloaded dataset from Hugging Face
-def load_hf_dataset_wikitext(split='train', n_shards=None):
-
-    ds = load_dataset("wikitext", "wikitext-103-raw-v1", split=split, streaming=True)
-    ds = ds.select_columns("text")
+def load_hf_dataset(data_source='wiki', split='train', n_shards=None):
+    if data_source == 'wiki':
+        ds = load_dataset("wikitext", "wikitext-103-raw-v1", split=split, streaming=True)
+        ds = ds.select_columns("text")
+    elif data_source == 'alpaca':
+        ds = load_dataset("tatsu-lab/alpaca", split=split, streaming=True)
+        ds = ds.select_columns("text")
+    else:
+        raise ValueError(...)
     return ds
 
 def is_distirbuted_dataset(iterable):

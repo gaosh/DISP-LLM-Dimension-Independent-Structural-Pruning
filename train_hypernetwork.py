@@ -31,7 +31,7 @@ warnings.filterwarnings("ignore")
 
 # Custom modules and tools
 from utils import DistributedEnv
-from data import dataloader_creator, load_hf_dataset_wikitext
+from data import dataloader_creator, load_hf_dataset
 from models import (
     LlamaTokenizer,
     PruneLlamaForCausalLM,
@@ -75,6 +75,7 @@ def main(
     min_hn_lr: float = 1e-3,
     use_sch: bool = False,
     use_bf16: bool = False,
+    data_source: str = 'wiki',
 ):
 
     # Initialize the distributed environment
@@ -132,7 +133,7 @@ def main(
     
     # Load dataset
     tic = time.time()
-    result_dataset = load_hf_dataset_wikitext('train', env.world_size * num_workers)
+    result_dataset = load_hf_dataset(data_source=data_source, split='train', n_shards=env.world_size * num_workers)
 
     train_dataloader_hn = dataloader_creator(
         dataset=result_dataset,
