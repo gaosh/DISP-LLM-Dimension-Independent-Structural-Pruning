@@ -12,24 +12,36 @@ from transformers.models.llama.modeling_llama import LlamaRMSNorm
 class collect_info_reg_llama(nn.Module):
     def __init__(self, model, p=None, lam=4.0):
         super(collect_info_reg_llama, self).__init__()
-        self.sum_ori_params = 0 
-        self.p = p  
-        self.lam = lam  
-        self.in_dim_list = [] 
-        self.out_dim_list = []  
-        self.num_w_list = []  
-        self.structures = []  
-        self.gate_type = []  
-        
-        modules = list(model.modules())  
+
+        self.sum_ori_params = 0
+        self.p = p
+        self.lam = lam
+
+        self.in_dim_list = []
+        self.out_dim_list = []
+        self.num_w_list = []
+        self.structures = []
+        self.gate_type = []
+
+        # For attention blocks:
+        #   MHA fallback: q_dim == kv_dim == dim_2
+        #   GQA: q_dim = qo_dim, kv_dim = kv_dim
+        self.attn_q_dim_list = []
+        self.attn_kv_dim_list = []
+
+        modules = list(model.modules())
         for layer_id in range(len(modules)):
             m = modules[layer_id]
+
             if type(m).__name__ == 'virtual_block_basic_operation':
                 self.structures.append(m.dim)
                 self.in_dim_list.append(None)
                 self.out_dim_list.append(None)
                 self.num_w_list.append(None)
+                self.attn_q_dim_list.append(None)
+                self.attn_kv_dim_list.append(None)
                 self.gate_type.append('mlp_block')
+
             if type(m).__name__ == 'virtual_mlp_operation':
                 ori_param = m.get_parameters()
                 self.sum_ori_params += ori_param
@@ -37,7 +49,10 @@ class collect_info_reg_llama(nn.Module):
                 self.out_dim_list.append(m.ex_dict['dim_2'])
                 self.num_w_list.append(m.ex_dict['num_weight'])
                 self.structures.append(m.dim)
+                self.attn_q_dim_list.append(None)
+                self.attn_kv_dim_list.append(None)
                 self.gate_type.append('mlp')
+
             if type(m).__name__ == 'virtual_block_attn_operation':
                 ori_param = m.get_parameters()
                 self.sum_ori_params += ori_param
@@ -47,39 +62,62 @@ class collect_info_reg_llama(nn.Module):
                 self.structures.append(m.dim)
                 self.head_dim = m.head_dim
                 self.num_heads = m.dim
+
+                qo_dim = m.ex_dict.get('qo_dim', m.ex_dict['dim_2'])
+                kv_dim = m.ex_dict.get('kv_dim', m.ex_dict['dim_2'])
+
+                self.attn_q_dim_list.append(qo_dim)
+                self.attn_kv_dim_list.append(kv_dim)
                 self.gate_type.append('attn_block')
+
             if type(m).__name__ == 'virtual_basic_operation':
                 self.structures.append(m.dim)
                 self.in_dim_list.append(None)
                 self.out_dim_list.append(None)
                 self.num_w_list.append(None)
+                self.attn_q_dim_list.append(None)
+                self.attn_kv_dim_list.append(None)
                 self.gate_type.append('basic_gate')
 
-            print("Number of original parameters: %.3f" % (self.sum_ori_params / 10 ** 6))
-            
+        print("Number of original parameters: %.3f" % (self.sum_ori_params / 10 ** 6))
+
     def forward(self, vectors):
-        block_mlp_dim = None
         sum_params = 0
         i = 0
+
         while i < len(self.structures):
-            # Process attention blocks
             if self.gate_type[i] == 'attn_block':
                 attn_in_dim = vectors[i].sum()
-                attn_out_dim = vectors[i+1].sum()
-                current_params = attn_in_dim * 3 * self.out_dim_list[i] + attn_out_dim * self.out_dim_list[i]
+                attn_out_dim = vectors[i + 1].sum()
+
+                q_dim = self.attn_q_dim_list[i]
+                kv_dim = self.attn_kv_dim_list[i]
+
+                current_params = (
+                    attn_in_dim * (q_dim + 2 * kv_dim) +
+                    attn_out_dim * q_dim
+                )
+
                 i += 2
                 sum_params += current_params
+                continue
 
-            # Process MLP blocks
             if self.gate_type[i] == 'mlp_block':
                 block_mlp_in_dim = vectors[i].sum()
-                block_mlp_middle_dim = vectors[i+1].sum()
-                block_mlp_out_dim = vectors[i+2].sum()
-                current_params = block_mlp_in_dim * block_mlp_middle_dim * 2 + block_mlp_middle_dim * block_mlp_out_dim
+                block_mlp_middle_dim = vectors[i + 1].sum()
+                block_mlp_out_dim = vectors[i + 2].sum()
+
+                current_params = (
+                    block_mlp_in_dim * block_mlp_middle_dim * 2 +
+                    block_mlp_middle_dim * block_mlp_out_dim
+                )
+
                 i += 3
                 sum_params += current_params
+                continue
 
-        # Calculate parameter ratio
+            i += 1
+
         param_ratio = sum_params / self.sum_ori_params
         if param_ratio > self.p:
             clamped_p_ratio = torch.clamp(param_ratio, min=self.p)
