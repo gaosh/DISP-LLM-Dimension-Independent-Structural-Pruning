@@ -32,7 +32,13 @@ warnings.filterwarnings("ignore")
 # Custom modules and tools
 from utils import DistributedEnv
 from data import dataloader_creator, load_hf_dataset_wikitext
-from models import LlamaTokenizer, PruneLlamaForCausalLM, PruneLlamaDecoderLayer
+from models import (
+    LlamaTokenizer,
+    PruneLlamaForCausalLM,
+    PruneLlamaDecoderLayer,
+    PruneQwen3ForCausalLM,
+    PruneQwen3DecoderLayer,
+)
 from pruning import hypernetwork, collect_info_reg_llama, help_functions_hn
 
 
@@ -41,6 +47,13 @@ def round_to_block_size(current_rank, block_size=32):
     round_rank = max(block_size, (current_rank // block_size) * block_size)
     return round_rank
 
+def select_model_classes(hf_model: str):
+    hf_model_lower = hf_model.lower()
+
+    if "qwen" in hf_model_lower:
+        return PruneQwen3ForCausalLM, PruneQwen3DecoderLayer
+
+    return PruneLlamaForCausalLM, PruneLlamaDecoderLayer
 
 def main(
     exp_name: str = 'displlm',
@@ -112,9 +125,9 @@ def main(
     ignored_token = tokenizer.bos_token_id
 
     # Load the prunable LLaMA model and collect pruning information
-    model = PruneLlamaForCausalLM.from_pretrained(hf_model)
+    model_cls, decoder_layer_cls = select_model_classes(hf_model)
+    model = model_cls.from_pretrained(hf_model)
     model.config.use_cache = False
-    env.print_master(model.config)
     print(model)
     
     # Load dataset
@@ -152,7 +165,7 @@ def main(
     if use_fsdp:
         my_auto_wrap_policy = partial(
             transformer_auto_wrap_policy,
-            transformer_layer_cls={PruneLlamaDecoderLayer}
+            transformer_layer_cls={decoder_layer_cls}
         )
         if use_bf16:
             model = model.to(data_type).to(device_id)
