@@ -39,7 +39,7 @@ run_exp () {
         --lam 16.0 \
         --batch_size 1 \
         --use_bf16 True \
-        --total_n_step 20000 \
+        --total_n_step 10000 \
         --hn_lr 1e-3 \
         --min_hn_lr 1e-3 \
         --use_sch False \
