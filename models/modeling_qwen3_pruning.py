@@ -82,9 +82,9 @@ class Qwen3MLP(nn.Module):
         }
         self.use_gate = True
 
-        self.virtual_block_gate_1 = virtual_block_basic_operation(dim=config.hidden_size, mode="Up")
-        self.virtual_gate = virtual_mlp_operation(dim=config.intermediate_size, mode="None", ex_dict=ex_dict)
-        self.virtual_block_gate_2 = virtual_basic_operation(dim=config.hidden_size, mode="Down")
+        self.virtual_block_gate_1 = virtual_block_basic_operation(dim=config.hidden_size,)
+        self.virtual_gate = virtual_mlp_operation(dim=config.intermediate_size, ex_dict=ex_dict)
+        self.virtual_block_gate_2 = virtual_basic_operation(dim=config.hidden_size)
 
     def forward(self, x):
         x = self.virtual_block_gate_1(x, self.use_gate)
@@ -194,8 +194,8 @@ class Qwen3Attention(nn.Module):
         }
         self.use_gate = True
 
-        self.virtual_attn_gate_1 = virtual_block_attn_operation(dim=config.hidden_size, mode="Up", ex_dict=ex_dict)
-        self.virtual_attn_gate_2 = virtual_basic_operation(dim=config.hidden_size, mode="Down")
+        self.virtual_attn_gate_1 = virtual_block_attn_operation(dim=config.hidden_size, ex_dict=ex_dict)
+        self.virtual_attn_gate_2 = virtual_basic_operation(dim=config.hidden_size)
 
     def forward(
         self,
