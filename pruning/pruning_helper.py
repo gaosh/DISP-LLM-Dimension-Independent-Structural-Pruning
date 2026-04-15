@@ -56,15 +56,17 @@ class collect_info_reg_llama(nn.Module):
             if type(m).__name__ == 'virtual_block_attn_operation':
                 ori_param = m.get_parameters()
                 self.sum_ori_params += ori_param
-                self.in_dim_list.append(m.ex_dict['dim_1'])
-                self.out_dim_list.append(m.ex_dict['dim_2'])
+
+                hidden_dim = m.ex_dict.get('hidden_dim', m.ex_dict.get('dim_1', None))
+                qo_dim = m.ex_dict.get('qo_dim', m.ex_dict.get('dim_2', None))
+                kv_dim = m.ex_dict.get('kv_dim', m.ex_dict.get('dim_2', None))
+
+                self.in_dim_list.append(hidden_dim)
+                self.out_dim_list.append(hidden_dim)
                 self.num_w_list.append(m.ex_dict['num_weight'])
                 self.structures.append(m.dim)
                 self.head_dim = m.head_dim
                 self.num_heads = m.dim
-
-                qo_dim = m.ex_dict.get('qo_dim', m.ex_dict['dim_2'])
-                kv_dim = m.ex_dict.get('kv_dim', m.ex_dict['dim_2'])
 
                 self.attn_q_dim_list.append(qo_dim)
                 self.attn_kv_dim_list.append(kv_dim)
