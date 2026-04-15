@@ -113,7 +113,27 @@ class virtual_block_attn_operation(virtual_basic_operation):
         self.head_dim = ex_dict['head_dim']
 
     def get_parameters(self):
-        return self.ex_dict['dim_1'] * self.ex_dict['dim_2'] * self.ex_dict['num_weight']
+        # Old-style attention metadata
+        if 'dim_1' in self.ex_dict and 'dim_2' in self.ex_dict:
+            return self.ex_dict['dim_1'] * self.ex_dict['dim_2'] * self.ex_dict['num_weight']
+
+        # GQA/Qwen-style attention metadata
+        if 'hidden_dim' in self.ex_dict and 'qo_dim' in self.ex_dict and 'kv_dim' in self.ex_dict:
+            hidden_dim = self.ex_dict['hidden_dim']
+            qo_dim = self.ex_dict['qo_dim']
+            kv_dim = self.ex_dict['kv_dim']
+
+            # q_proj + k_proj + v_proj + o_proj
+            return (
+                hidden_dim * qo_dim +
+                hidden_dim * kv_dim +
+                hidden_dim * kv_dim +
+                qo_dim * hidden_dim
+            )
+
+        raise KeyError(
+            f"Unsupported ex_dict for virtual_block_attn_operation: {self.ex_dict.keys()}"
+        )
 
 class virtual_mlp_operation(virtual_basic_operation):
     def __init__(self, dim, ex_dict={}):
