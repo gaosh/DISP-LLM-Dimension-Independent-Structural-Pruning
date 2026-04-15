@@ -87,12 +87,12 @@ class Qwen3MLP(nn.Module):
         self.virtual_block_gate_2 = virtual_basic_operation(dim=config.hidden_size)
 
     def forward(self, x):
-        x = self.virtual_block_gate_1(x, self.use_gate)
+        x = self.virtual_block_gate_1(x)
         down_proj = self.down_proj(
-            self.virtual_gate(self.act_fn(self.gate_proj(x)), self.use_gate)
-            * self.virtual_gate(self.up_proj(x), self.use_gate)
+            self.virtual_gate(self.act_fn(self.gate_proj(x)))
+            * self.virtual_gate(self.up_proj(x))
         )
-        down_proj = self.virtual_block_gate_2(down_proj, self.use_gate)
+        down_proj = self.virtual_block_gate_2(down_proj)
         return down_proj
 
 
@@ -211,7 +211,7 @@ class Qwen3Attention(nn.Module):
         kv_hidden_shape = (*input_shape, self.num_key_value_heads, self.head_dim)
 
 
-        hidden_states = self.virtual_attn_gate_1(hidden_states, self.use_gate)
+        hidden_states = self.virtual_attn_gate_1(hidden_states)
 
         query_states = self.q_norm(self.q_proj(hidden_states).view(q_hidden_shape)).transpose(1, 2)
         key_states = self.k_norm(self.k_proj(hidden_states).view(kv_hidden_shape)).transpose(1, 2)
@@ -255,7 +255,7 @@ class Qwen3Attention(nn.Module):
 
         attn_output = attn_output.reshape(*input_shape, -1).contiguous()
         attn_output = self.o_proj(attn_output)
-        attn_output = self.virtual_attn_gate_2(attn_output, self.use_gate)
+        attn_output = self.virtual_attn_gate_2(attn_output)
         return attn_output, attn_weights
 
 
