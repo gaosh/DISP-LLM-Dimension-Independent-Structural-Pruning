@@ -16,32 +16,32 @@ mkdir -p "${MODEL_ROOT}"
 
 TASKS="hellaswag,arc_easy,arc_challenge,piqa,winogrande"
 BASE_PORT=12323
-RUN_PPL=true
+RUN_PPL=false
 
 # Each row:
-# EXP_NAME | PVAL | HF_MODEL | FAMILY_DIR | SAVE_NAME | EVAL_BATCH_SIZE
+# EXP_NAME | PVAL | HF_MODEL | TMP_OUT_DIR | EVAL_BATCH_SIZE
+# TMP_OUT_DIR is ONE folder per model family, reused across different p values.
 MODELS=(
-    "qwen3_8b_alpaca|0.50|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.50|32"
-    "qwen3_8b_alpaca|0.60|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.60|32"
-    "qwen3_8b_alpaca|0.70|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.70|32"
+    "qwen3_8b_alpaca|0.50|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
+    "qwen3_8b_alpaca|0.60|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
+    "qwen3_8b_alpaca|0.70|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
+    # "qwen3_14b_alpaca|0.50|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
+    # "qwen3_14b_alpaca|0.60|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
 
-    # "qwen3_14b_alpaca|0.50|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|qwen3_14b_alpaca_0.50|16"
-    # "qwen3_14b_alpaca|0.60|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|qwen3_14b_alpaca_0.60|16"
-
-    # "qwen3_32b_alpaca|0.50|Qwen/Qwen3-32B|${MODEL_ROOT}/qwen3_32b_alpaca|qwen3_32b_alpaca_0.50|4"
+    # "qwen3_32b_alpaca|0.50|Qwen/Qwen3-32B|${MODEL_ROOT}/qwen3_32b_alpaca|4"
 )
 
 idx=0
 for item in "${MODELS[@]}"; do
-    IFS='|' read -r EXP_NAME PVAL HF_MODEL FAMILY_DIR SAVE_NAME EVAL_BATCH_SIZE <<< "${item}"
+    IFS='|' read -r EXP_NAME PVAL HF_MODEL TMP_OUT_DIR EVAL_BATCH_SIZE <<< "${item}"
 
     HN_PATH="${HN_ROOT}/${EXP_NAME}/hn-ckpt-final-${PVAL}.pt"
-    TMP_OUT_DIR="${FAMILY_DIR}/${SAVE_NAME}"
+    SAVE_NAME="${EXP_NAME}_${PVAL}"
     LOG_FILE="${LOG_ROOT}/${SAVE_NAME}.txt"
     PORT=$((BASE_PORT + idx))
 
-    mkdir -p "${FAMILY_DIR}"
-    rm -rf "${TMP_OUT_DIR}"
+    mkdir -p "${TMP_OUT_DIR}"
+    rm -rf "${TMP_OUT_DIR:?}/"*
 
     {
         echo "=================================================="
