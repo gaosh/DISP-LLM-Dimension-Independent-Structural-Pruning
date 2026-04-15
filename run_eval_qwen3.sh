@@ -25,9 +25,9 @@ MODELS=(
     "qwen3_8b_alpaca|0.50|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
     "qwen3_8b_alpaca|0.60|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
     "qwen3_8b_alpaca|0.70|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|32"
-    # "qwen3_14b_alpaca|0.50|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
-    # "qwen3_14b_alpaca|0.60|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
-
+    "qwen3_14b_alpaca|0.50|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
+    "qwen3_14b_alpaca|0.60|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
+    "qwen3_14b_alpaca|0.70|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|16"
     # "qwen3_32b_alpaca|0.50|Qwen/Qwen3-32B|${MODEL_ROOT}/qwen3_32b_alpaca|4"
 )
 
