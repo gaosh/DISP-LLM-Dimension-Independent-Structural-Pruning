@@ -21,12 +21,14 @@ RUN_PPL=true
 # Each row:
 # EXP_NAME | PVAL | HF_MODEL | FAMILY_DIR | SAVE_NAME | EVAL_BATCH_SIZE
 MODELS=(
-    # "qwen3_8b_alpaca|0.50|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.50|32"
-    # "qwen3_8b_alpaca|0.60|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.60|32"
+    "qwen3_8b_alpaca|0.50|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.50|32"
+    "qwen3_8b_alpaca|0.60|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.60|32"
+    "qwen3_8b_alpaca|0.70|Qwen/Qwen3-8B|${MODEL_ROOT}/qwen3_8b_alpaca|qwen3_8b_alpaca_0.70|32"
+
     # "qwen3_14b_alpaca|0.50|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|qwen3_14b_alpaca_0.50|16"
     # "qwen3_14b_alpaca|0.60|Qwen/Qwen3-14B|${MODEL_ROOT}/qwen3_14b_alpaca|qwen3_14b_alpaca_0.60|16"
 
-    "qwen3_32b_alpaca|0.50|Qwen/Qwen3-32B|${MODEL_ROOT}/qwen3_32b_alpaca|qwen3_32b_alpaca_0.50|4"
+    # "qwen3_32b_alpaca|0.50|Qwen/Qwen3-32B|${MODEL_ROOT}/qwen3_32b_alpaca|qwen3_32b_alpaca_0.50|4"
 )
 
 idx=0
