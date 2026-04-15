@@ -123,7 +123,7 @@ def main(
     if non_hf_tokenizer_path:
         env.print_master('Using non_hf_tokenizer ...')
         tokenizer = LlamaTokenizer(non_hf_tokenizer_path, output_type='list')
-    ignored_token = tokenizer.bos_token_id
+    ignored_token = tokenizer.eos_token_id
 
     # Load the prunable LLaMA model and collect pruning information
     model_cls, decoder_layer_cls = select_model_classes(hf_model)
