@@ -473,7 +473,7 @@ class Qwen3Model(Qwen3PreTrainedModel):
         ind = 0
 
         for decoder_layer in self.layers[: self.config.num_hidden_layers]:
-            if capture_hidden_indices is None or ind in capture_hidden_indices:
+            if output_hidden_states or (capture_hidden_indices is not None and ind in capture_hidden_indices):
                 all_hidden_states += (hidden_states,)
 
             if self.gradient_checkpointing and self.training:
@@ -512,7 +512,7 @@ class Qwen3Model(Qwen3PreTrainedModel):
 
         hidden_states = self.norm(hidden_states)
 
-        if capture_hidden_indices is None or ind in capture_hidden_indices:
+        if output_hidden_states or (capture_hidden_indices is not None and ind in capture_hidden_indices):
             all_hidden_states += (hidden_states,)
 
         next_cache = None
